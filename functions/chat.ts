@@ -1,23 +1,23 @@
-export async function onRequestPost(context: any) {
-  const { request } = context;
+export async function onRequest(context: any) {
 
-  const body = await request.json();
-  const message = body.message || "";
+  if (context.request.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405 });
+  }
+
+  const { message } = await context.request.json();
 
   const replies = [
-    "Fascinating input. Truly.",
-    "I will pretend that made sense.",
+    "Fascinating input.",
     "Processing sarcasm...",
-    "That might be the most human thing I've seen today.",
-    "Let me guess... you want intelligence?"
+    "Humans continue to confuse me.",
+    "That might require intelligence.",
+    "Input acknowledged."
   ];
 
   const reply = replies[Math.floor(Math.random() * replies.length)];
 
   return new Response(
     JSON.stringify({ reply }),
-    {
-      headers: { "Content-Type": "application/json" }
-    }
+    { headers: { "Content-Type": "application/json" } }
   );
 }
