@@ -15,12 +15,11 @@ export default function Home() {
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    const updated = [
-      ...messages,
-      { role: "user", content: input },
-      { role: "ai", content: "Processing sarcasm..." }
-    ];
-
+const updated: Message[] = [
+  ...messages,
+  { role: "user", content: input },
+  { role: "ai", content: "Processing sarcasm..." }
+];
     setMessages(updated);
     setInput("");
   };
