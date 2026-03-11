@@ -10,80 +10,132 @@ type Message = {
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [showTerms, setShowTerms] = useState(false);
 
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    const newMessages: Message[] = [
+    const updated = [
       ...messages,
       { role: "user", content: input },
-      { role: "ai", content: "Processing sarcasm..." },
+      { role: "ai", content: "Processing sarcasm..." }
     ];
 
-    setMessages(newMessages);
+    setMessages(updated);
     setInput("");
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black text-yellow-400">
+    <div className="flex flex-col h-screen bg-gradient-to-b from-black to-neutral-900 text-yellow-400">
 
-      {/* Top bar */}
-      <div className="flex justify-between items-center px-6 py-4 border-b border-yellow-500">
-        <h1 className="text-2xl font-bold tracking-wide">Quadron</h1>
+      {/* TOP BAR */}
+      <div className="flex justify-between items-center px-8 py-4 border-b border-yellow-600/40 backdrop-blur">
 
-        <div className="flex gap-3">
-          <button className="px-4 py-2 bg-yellow-400 text-black rounded-lg font-semibold hover:bg-yellow-300 transition">
+        <h1 className="text-2xl font-bold tracking-widest text-yellow-400">
+          QUADRON
+        </h1>
+
+        <div className="flex gap-4">
+
+          <button className="px-4 py-2 border border-yellow-400 rounded-lg hover:shadow-[0_0_10px_#FFD700] transition">
             Login
           </button>
 
-          <button className="px-4 py-2 border border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black transition">
+          <button className="px-4 py-2 border border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_12px_#FFD700] transition">
             Quadron-71
           </button>
+
         </div>
       </div>
 
-      {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      {/* CHAT AREA */}
+      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
 
         {messages.length === 0 && (
-          <div className="text-center text-yellow-500 opacity-70 mt-20">
-            Ask Quadron something...
+          <div className="text-center text-yellow-600 mt-32 text-lg opacity-70">
+            Ask Quadron anything...
           </div>
         )}
 
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`max-w-xl p-3 rounded-xl ${
-              msg.role === "user"
-                ? "ml-auto bg-yellow-400 text-black"
-                : "bg-neutral-900 border border-yellow-500"
-            }`}
-          >
-            {msg.content}
+          <div key={i} className="max-w-3xl mx-auto">
+
+            <div className="text-xs opacity-60 mb-1">
+              {msg.role === "user" ? "You" : "Quadron"}
+            </div>
+
+            <div className="text-lg leading-relaxed">
+              {msg.content}
+            </div>
+
           </div>
         ))}
 
       </div>
 
-      {/* Input area */}
-      <div className="border-t border-yellow-500 p-4 flex gap-3">
+      {/* INPUT */}
+      <div className="border-t border-yellow-700/40 p-5 flex justify-center">
 
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask Quadron..."
-          className="flex-1 bg-neutral-900 border border-yellow-500 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-yellow-400"
-        />
+        <div className="flex w-full max-w-3xl gap-3">
 
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask Quadron..."
+            className="flex-1 bg-black border border-yellow-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
+
+          <button
+            onClick={sendMessage}
+            className="px-6 py-3 border border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_10px_#FFD700] transition"
+          >
+            Send
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="text-center text-xs text-yellow-600 py-3 border-t border-yellow-700/30">
+
+        Developed by Rawat Systems Corp. , By using this you agree our{" "}
         <button
-          onClick={sendMessage}
-          className="bg-yellow-400 text-black px-6 rounded-lg font-semibold hover:bg-yellow-300 transition"
+          className="underline hover:text-yellow-300"
+          onClick={() => setShowTerms(true)}
         >
-          Send
+          Terms & Conditions
         </button>
 
       </div>
+
+      {/* TERMS MODAL */}
+      {showTerms && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
+
+          <div className="bg-neutral-900 border border-yellow-500 p-8 max-w-xl rounded-lg">
+
+            <h2 className="text-xl mb-4 font-bold">Terms & Conditions</h2>
+
+            <p className="text-sm text-yellow-300 leading-relaxed">
+              By using Quadron you agree that responses generated by this AI may
+              be inaccurate or humorous in nature. Quadron may refuse to answer
+              certain topics including political discussions or harmful content.
+              Data may be processed to improve AI performance. Users are
+              responsible for their usage of the platform.
+            </p>
+
+            <button
+              onClick={() => setShowTerms(false)}
+              className="mt-6 px-5 py-2 border border-yellow-400 rounded hover:bg-yellow-400 hover:text-black transition"
+            >
+              Close
+            </button>
+
+          </div>
+
+        </div>
+      )}
 
     </div>
   );
