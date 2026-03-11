@@ -1,8 +1,10 @@
+// functions/chat.ts
 export async function onRequestPost(context: any) {
   const { request } = context;
   const body = await request.json();
   const message = body.message || "";
 
+  // Sarcastic replies
   const replies = [
     "Fascinating input. Truly.",
     "I will pretend that made sense.",
