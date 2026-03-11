@@ -1,68 +1,72 @@
-"use client";
+'use client';
+import { useState } from 'react';
+import './globals.css';
 
-import { useState } from "react";
+type Message = {
+  role: 'user' | 'ai';
+  content: string;
+};
 
-export default function Page() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ role: "user" | "ai"; content: string }[]>([]);
+export default function Home() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    setMessages([...messages, { role: "user", content: input }]);
-    setInput("");
+    // Add user message locally
+    const newMessages = [...messages, { role: 'user', content: input }];
+    setMessages(newMessages);
+    setInput('');
 
+    // Call backend
     try {
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input }),
       });
-
-      if (!res.ok) throw new Error("AI backend error");
-
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "ai", content: data.reply }]);
+      setMessages([...newMessages, { role: 'ai', content: data.reply }]);
     } catch (err) {
-      setMessages((prev) => [...prev, { role: "ai", content: "Quadron is temporarily unavailable." }]);
+      setMessages([...newMessages, { role: 'ai', content: 'Quadron is temporarily unavailable.' }]);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") sendMessage();
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') sendMessage();
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black text-yellow-400 p-4">
-      <h1 className="text-4xl font-bold mb-4">Quadron</h1>
+    <div className="flex flex-col h-screen bg-gradient-to-b from-black to-neutral-900 text-yellow-400 p-4">
       <div className="flex-1 overflow-y-auto mb-4 space-y-2">
-        {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
+        {messages.map((m, idx) => (
+          <div
+            key={idx}
+            className={`p-2 rounded ${m.role === 'user' ? 'bg-yellow-900 text-white self-end' : 'bg-yellow-700 self-start'}`}
+          >
             {m.content}
           </div>
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="flex space-x-2">
         <input
-          className="flex-1 p-2 rounded bg-neutral-800 text-yellow-400"
+          className="flex-1 p-2 rounded bg-black border border-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleKey}
           placeholder="Type your message..."
         />
         <button
+          className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded transition-all duration-200 glow"
           onClick={sendMessage}
-          className="px-4 py-2 bg-yellow-400 text-black font-bold rounded hover:brightness-125 transition"
         >
           Send
         </button>
       </div>
-      <p className="text-xs mt-4 text-center">
-        Developed by Rawat Systems Corp. By using this you agree to our{" "}
-        <a href="/terms" className="underline">
-          Terms & Conditions
-        </a>
-      </p>
+      <div className="mt-4 text-center text-xs text-gray-400">
+        Developed by Rawat Systems Corp. — <a href="/terms" className="underline">Terms & Conditions</a>
+      </div>
     </div>
   );
 }
