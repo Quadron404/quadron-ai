@@ -4,20 +4,23 @@ export async function onRequest(context: any) {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  const { message } = await context.request.json();
+  const body = await context.request.json();
+  const message = body.message || "";
 
   const replies = [
-    "Fascinating input.",
+    "Fascinating input. Truly.",
     "Processing sarcasm...",
     "Humans continue to confuse me.",
-    "That might require intelligence.",
-    "Input acknowledged."
+    "I will pretend that made sense.",
+    "Intelligence not detected."
   ];
 
   const reply = replies[Math.floor(Math.random() * replies.length)];
 
   return new Response(
     JSON.stringify({ reply }),
-    { headers: { "Content-Type": "application/json" } }
+    {
+      headers: { "Content-Type": "application/json" }
+    }
   );
 }

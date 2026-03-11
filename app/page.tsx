@@ -2,29 +2,21 @@
 
 import { useState } from "react";
 
-type Message = {
-  role: "user" | "ai";
-  content: string;
-};
-
 export default function Home() {
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<{role:string,content:string}[]>([]);
   const [input, setInput] = useState("");
-  const [showTerms, setShowTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const sendMessage = async () => {
 
     if (!input.trim()) return;
 
-    const userText = input;
+    const userMessage = { role: "user", content: input };
 
-    setMessages(prev => [
-      ...prev,
-      { role: "user", content: userText }
-    ]);
-
+    setMessages(prev => [...prev, userMessage]);
     setInput("");
+    setLoading(true);
 
     try {
 
@@ -33,168 +25,77 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ message: userText })
+        body: JSON.stringify({ message: input })
       });
 
       const data = await res.json();
 
-      const aiReply =
-        data.result?.response ||
-        data.response ||
-        "Quadron is temporarily unavailable.";
+      const aiMessage = { role: "ai", content: data.reply };
+
+      setMessages(prev => [...prev, aiMessage]);
+
+    } catch (error) {
 
       setMessages(prev => [
         ...prev,
-        { role: "ai", content: aiReply }
-      ]);
-
-    } catch {
-
-      setMessages(prev => [
-        ...prev,
-        { role: "ai", content: "Network error. Quadron rolled its eyes." }
+        { role: "ai", content: "Quadron is unavailable temporarily." }
       ]);
 
     }
 
+    setLoading(false);
   };
 
   return (
 
-    <div className="flex flex-col h-screen bg-gradient-to-b from-black to-neutral-900 text-yellow-400">
+    <div className="flex flex-col h-screen bg-black text-yellow-400">
 
-      {/* TOP BAR */}
-
-      <div className="flex justify-between items-center px-8 py-4 border-b border-yellow-600/40">
-
-        <h1 className="text-2xl font-bold tracking-widest">
-          QUADRON
-        </h1>
-
-        <div className="flex gap-4">
-
-          <button className="px-4 py-2 border border-yellow-400 rounded-lg hover:shadow-[0_0_10px_#FFD700] transition">
-            Login
-          </button>
-
-          <button className="px-4 py-2 border border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_10px_#FFD700] transition">
-            Quadron-71
-          </button>
-
-        </div>
-
+      <div className="p-4 text-xl border-b border-yellow-500">
+        Quadron AI
       </div>
 
-
-      {/* CHAT AREA */}
-
-      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
-
-        {messages.length === 0 && (
-
-          <div className="text-center text-yellow-600 mt-32 opacity-70">
-            Ask Quadron anything...
-          </div>
-
-        )}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
         {messages.map((msg, i) => (
 
-          <div key={i} className="max-w-3xl mx-auto">
-
-            <div className="text-xs opacity-60 mb-1">
-              {msg.role === "user" ? "You" : "Quadron"}
-            </div>
-
-            <div className="text-lg leading-relaxed">
+          <div key={i} className={msg.role === "user" ? "text-right" : "text-left"}>
+            <span className="inline-block bg-neutral-800 p-2 rounded">
               {msg.content}
-            </div>
-
+            </span>
           </div>
 
         ))}
 
-      </div>
-
-
-      {/* INPUT AREA */}
-
-      <div className="border-t border-yellow-700/40 p-5 flex justify-center">
-
-        <div className="flex w-full max-w-3xl gap-3">
-
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Quadron..."
-            className="flex-1 bg-black border border-yellow-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          />
-
-          <button
-            onClick={sendMessage}
-            className="px-6 py-3 border border-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_10px_#FFD700] transition"
-          >
-            Send
-          </button>
-
-        </div>
+        {loading && (
+          <div>Quadron is thinking...</div>
+        )}
 
       </div>
 
+      <div className="p-4 border-t border-yellow-500 flex gap-2">
 
-      {/* FOOTER */}
-
-      <div className="text-center text-xs text-yellow-600 py-3 border-t border-yellow-700/30">
-
-        Developed by Rawat Systems Corp. , By using this you agree our{" "}
+        <input
+          className="flex-1 bg-neutral-900 p-2 rounded"
+          value={input}
+          onChange={(e)=>setInput(e.target.value)}
+          onKeyDown={(e)=>{ if(e.key==="Enter") sendMessage(); }}
+          placeholder="Ask Quadron something..."
+        />
 
         <button
-          className="underline hover:text-yellow-300"
-          onClick={() => setShowTerms(true)}
+          onClick={sendMessage}
+          className="bg-yellow-500 text-black px-4 rounded"
         >
-          Terms & Conditions
+          Send
         </button>
 
       </div>
 
-
-      {/* TERMS WINDOW */}
-
-      {showTerms && (
-
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
-
-          <div className="bg-neutral-900 border border-yellow-500 p-8 max-w-xl rounded-lg">
-
-            <h2 className="text-xl mb-4 font-bold">
-              Terms & Conditions
-            </h2>
-
-            <p className="text-sm text-yellow-300 leading-relaxed">
-
-              By using Quadron you agree that responses generated by this AI
-              may be inaccurate or humorous in nature. Quadron may refuse to
-              answer certain topics including political discussions. Data may
-              be processed to improve AI performance. Users are responsible
-              for their usage of the platform.
-
-            </p>
-
-            <button
-              onClick={() => setShowTerms(false)}
-              className="mt-6 px-5 py-2 border border-yellow-400 rounded hover:bg-yellow-400 hover:text-black transition"
-            >
-              Close
-            </button>
-
-          </div>
-
-        </div>
-
-      )}
+      <div className="text-xs text-center p-2 text-neutral-500">
+        Developed by Rawat Systems Corp. By using this you agree our Terms & Conditions
+      </div>
 
     </div>
 
   );
-
 }
