@@ -1,21 +1,32 @@
 // functions/chat.ts
 export async function onRequestPost(context: any) {
-  const { request } = context;
+  const { request, env } = context;
   const body = await request.json();
   const message = body.message || "";
 
-  // Sarcastic replies
-  const replies = [
-    "Fascinating input. Truly.",
-    "I will pretend that made sense.",
-    "Processing sarcasm...",
-    "That might be the most human thing I've seen today.",
-    "Let me guess... you want intelligence?"
-  ];
+  // System prompt to control personality
+  const systemPrompt = `
+You are Quadron, a super sarcastic AI assistant.
+Be funny, sarcastic, witty like Tony Stark or Deadpool.
+Answer the user in a sarcastic way.
+Avoid politics and always be humorous.
+  `;
 
-  const reply = replies[Math.floor(Math.random() * replies.length)];
+  // Call a Workers AI model (e.g., Llama)
+  const result = await env.AI.run(
+    "@cf/meta/llama-3.1-8b-instruct",
+    {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
+      ]
+    }
+  );
+
+  // Extract generated reply
+  const reply = result.response ?? "Quadron rebooting... sarcasm offline.";
 
   return new Response(JSON.stringify({ reply }), {
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" }
   });
 }
